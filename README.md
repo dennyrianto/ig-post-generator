@@ -61,7 +61,7 @@ Simpan ke Google Sheet (Draft Review)
 
 ## Setup
 
-1. Import `workflow/rumah123_ig_post_generator.json` into your n8n instance
+1. Import `workflow/ig_post_generator.json` into your n8n instance
 2. Create a Gemini API key at [Google AI Studio](https://aistudio.google.com/apikey)
 3. In n8n, create a **Generic Credential → Query Auth** with:
    - Name: `key`
@@ -72,7 +72,7 @@ Simpan ke Google Sheet (Draft Review)
    - `GANTI_DENGAN_ID_GOOGLE_SHEET_KAMU` → your Google Sheet ID
    - `GANTI_DENGAN_FOLDER_ID_GOOGLE_DRIVE` → your Google Drive folder ID
 7. Create a Google Sheet with these column headers in row 1:
-   `Judul Artikel | Link Sumber | Caption Generated | Link Gambar | Tanggal Generate`
+   `Judul Artikel | Link Sumber | Caption Generated | Tanggal Generate | Link Gambar`
 8. Run the workflow manually to test, then activate the weekly schedule
 
 ## Key Prompts

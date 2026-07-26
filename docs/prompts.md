@@ -1,6 +1,6 @@
 # Key Prompts
 
-## 1. Caption Generation (Google Gemini API — `gemini-2.5-flash`)
+## 1. Caption Generation (Google Gemini API — `gemini-3.5-flash`)
 
 ```
 Kamu adalah Social Media Strategist dan Senior Copywriter untuk Rumah123,
