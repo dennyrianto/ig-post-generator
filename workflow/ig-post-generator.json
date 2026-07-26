@@ -1,0 +1,374 @@
+{
+  "name": "Weekly IG Post Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// Susun prompt gambar dan encode supaya aman dipakai di URL\nconst original = $json;\nconst imagePrompt = `Flat illustration modern style Instagram post about ${original.article_title}, warm color palette dusty pink cream navy, symbolic house and savings financial elements, indonesian young adults first time home buyer theme, no text no words in image`;\nreturn [{\n  json: {\n    image_prompt_encoded: encodeURIComponent(imagePrompt)\n  }\n}];"
+      },
+      "id": "c91060c3-27b2-43ad-949b-aefbcf77ba90",
+      "name": "Susun Prompt Gambar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        944
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://image.pollinations.ai/prompt/{{ $json.image_prompt_encoded }}?width=1024&height=1024&model=flux&nologo=true",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "23f758dc-6d40-475e-a781-db59da0daab8",
+      "name": "Generate IG Image (Pollinations)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1456,
+        944
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks"
+            }
+          ]
+        }
+      },
+      "id": "3ff57c69-bc03-4279-8663-a66525add71e",
+      "name": "Weekly Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        352,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss/search?q=properti+indonesia+KPR&hl=id&gl=ID&ceid=ID:id",
+        "options": {}
+      },
+      "id": "bbabb9f2-2acc-49e9-82dd-105419e7cb4c",
+      "name": "Fetch Property News (RSS)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        576,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ contents: [ { parts: [ { text: `Kamu adalah Social Media Strategist dan Senior Copywriter untuk Rumah123, platform properti nomor 1 di Indonesia. Brand voice: professional, trustworthy, tapi tetap fun, relatable, dan santai (semi-kasual urban) untuk audiens Millennials & Gen Z usia 23-32 tahun yang sedang mempertimbangkan membeli rumah pertama.\\n\\nBuatkan caption Instagram (tipe carousel) berdasarkan berita berikut:\\n\\nJudul: ${$json.title}\\nRingkasan: ${$json.summary}\\nSumber: ${$json.link}\\n\\nIkuti struktur ini:\\n1. Headline / Visual Concept Brief untuk slide 1\\n2. Caption Utama (Hook 2 baris pertama yang kuat, body dengan bullet points + emoji fungsional, CTA mengarahkan ke fitur Simulasi KPR Rumah123 dan mengajak komentar)\\n3. 5-7 Hashtags gabungan brand dan properti umum\\n\\nFormat output dalam Markdown dengan 3 bagian di atas. Langsung tulis hasil akhirnya saja, tanpa catatan tambahan atau proses berpikir.` } ] } ], generationConfig: { maxOutputTokens: 2048, thinkingConfig: { thinkingBudget: 0 } } }) }}",
+        "options": {}
+      },
+      "id": "8047438e-dab0-4f9b-a798-1c59ee1b8cec",
+      "name": "Generate IG Caption (Gemini)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1024,
+        784
+      ],
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "wABEBk6FE7AViEjj",
+          "name": "Query Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1tGSuLz9rQPqvOSKHZgKe9G-mJ6uMPdfbZWTPBvTK04w/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tGSuLz9rQPqvOSKHZgKe9G-mJ6uMPdfbZWTPBvTK04w/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Judul Artikel": "={{ $json.article_title }}",
+            "Link Sumber": "={{ $json.article_link }}",
+            "Caption Generated": "={{ $json.generated_post }}",
+            "Tanggal Generate": "={{ $json.generated_at }}",
+            "Link Gambar": "={{ $json.image_link }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Judul Artikel",
+              "displayName": "Judul Artikel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Link Sumber",
+              "displayName": "Link Sumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Caption Generated",
+              "displayName": "Caption Generated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tanggal Generate",
+              "displayName": "Tanggal Generate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Link Gambar",
+              "displayName": "Link Gambar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "e131af2e-cf8a-4439-9617-8645799997d2",
+      "name": "Simpan ke Google Sheet (Draft Review)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2112,
+        944
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "n2gfCa6i8eX7Sd82",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Gabungkan data teks caption (dari node sebelumnya) dengan link gambar hasil upload\nconst original = $('Parse & Format Output').first().json;\nconst driveResponse = $input.first().json;\nreturn [{\n  json: {\n    article_title: original.article_title,\n    article_link: original.article_link,\n    generated_post: original.generated_post,\n    generated_at: original.generated_at,\n    image_link: driveResponse.webViewLink || driveResponse.webContentLink || ''\n  }\n}];"
+      },
+      "id": "eaf17268-ac96-4960-b916-c46e142cec75",
+      "name": "Combine Final Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1904,
+        944
+      ]
+    },
+    {
+      "parameters": {
+        "name": "={{ 'ig_post_' + $now.format('yyyy-MM-dd') + '.png' }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1E9BF-D25C5c8bLcLhhKswtmSR6mJqZeq",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "5de29300-f5cc-4b54-be01-0194ee96bba4",
+      "name": "Upload to Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1680,
+        944
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Rm5haWX0Bzc4S9Nz",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Ekstrak teks hasil dari response Gemini\nconst response = $input.first().json;\nconst generatedText = response.candidates[0].content.parts[0].text;\nreturn [{\n  json: {\n    article_title: $('Pilih Artikel Terbaru').first().json.title,\n    article_link: $('Pilih Artikel Terbaru').first().json.link,\n    generated_post: generatedText,\n    generated_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "d888486c-023f-4726-863a-b295ccf4e543",
+      "name": "Parse & Format Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Ambil 1 artikel teratas (paling baru) dari hasil RSS\nconst items = $input.all();\nif (items.length === 0) {\n  throw new Error('Tidak ada artikel berita ditemukan');\n}\nconst topArticle = items[0].json;\nreturn [{\n  json: {\n    title: topArticle.title,\n    link: topArticle.link,\n    summary: topArticle.contentSnippet || topArticle.content || ''\n  }\n}];"
+      },
+      "id": "a043885f-100a-4e43-a474-78d07fcb60ac",
+      "name": "Pilih Artikel Terbaru",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        784
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Susun Prompt Gambar": {
+      "main": [
+        [
+          {
+            "node": "Generate IG Image (Pollinations)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate IG Image (Pollinations)": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weekly Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Property News (RSS)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Property News (RSS)": {
+      "main": [
+        [
+          {
+            "node": "Pilih Artikel Terbaru",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate IG Caption (Gemini)": {
+      "main": [
+        [
+          {
+            "node": "Parse & Format Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Final Output": {
+      "main": [
+        [
+          {
+            "node": "Simpan ke Google Sheet (Draft Review)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Combine Final Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Format Output": {
+      "main": [
+        [
+          {
+            "node": "Susun Prompt Gambar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pilih Artikel Terbaru": {
+      "main": [
+        [
+          {
+            "node": "Generate IG Caption (Gemini)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0300263e-48a4-4a1c-9471-03bfd37e0dae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6fe8102c098f560a167660b8ca6b05da3fbda63d073d85beca89f0daf6ca7c28"
+  },
+  "nodeGroups": [],
+  "id": "IFFQlQgzIuQCBUvw",
+  "tags": []
+}
