@@ -7,7 +7,7 @@
 ![Google Drive](https://img.shields.io/badge/Google_Drive-4285F4?style=for-the-badge&logo=googledrive&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey?style=for-the-badge)
 
-Automated n8n workflow that generates Instagram posts (caption + image) for **Rumah123** based on the latest Indonesian property news — built as part of the **99 Group AI Aptitude Challenge** (Graduate Program).
+Automated n8n workflow that generates Instagram posts (caption + image) for **Rumah123** based on the latest Indonesian property news.
 
 ## What it does
 
